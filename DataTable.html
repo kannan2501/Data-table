@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html>
+  
+<head>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <script src = "https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js">
+  </script>
+  <script src = "https://code.highcharts.com/highcharts.js"></script> 
+  <script src = "https://code.highcharts.com/modules/data.js"></script>
+  <style>
+    table {
+      font-family: Montserrat, sans-serif;
+      background: rgb(52, 73, 94);
+      color: white;
+      border-collapse:collapse;
+      table-layout: fixed;
+    width:1000px;
+   
+    }
+
+    table th {
+      height: 38px;
+      color: gold;
+      background-color: rgb(73, 117, 161);
+      cursor: pointer;
+      padding: 0.25em;
+      overflow: hidden;
+      max-width: 150px;
+
+    }
+
+    table td {
+      overflow: hidden;
+      text-overflow: clip;
+      word-wrap: break-word;
+
+      
+    }
+
+    table tr:nth-child(even) {
+      background-color: rgba(16, 116, 116, 0.342);
+
+    }
+
+
+    table tr:hover {
+      background-color: rgba(255, 255, 255, 0.61);
+      color: black;
+
+    }
+
+    table tbody tr td:hover::before{
+      content:'\f044';
+      font-family: FontAwesome;
+      
+    }
+  
+
+    table tbody tr td:hover:nth-child(8n)::before{
+      content:'';
+ 
+      
+    }
+
+   
+    
+
+    div {
+      width: 1100px;
+      height:900px;
+      height: 65%;
+      overflow: auto;
+      white-space: nowrap;
+      max-width: 900px;
+      max-height:800px;
+    }
+
+    thead th:first-child {
+      left: 0;
+      z-index: 1;
+
+    }
+
+    thead th {
+      text-align: left;
+      position: sticky;
+      top: 0;
+    }
+
+
+    tbody th:first-child {
+      left: 0;
+      z-index: 1;
+    }
+
+    tbody th {
+      position: sticky;
+      top: 0;
+    }
+
+
+
+
+    .delete:hover,
+    .edit:hover,
+    .save:hover,
+    .density:hover,
+    .visual:hover {
+      color: black;
+
+    }
+
+
+
+    .delete,
+    .edit,
+    .save {
+      float: left;
+      background-color: rgba(105, 63, 173, 0.247);
+      width: 27px;
+      height: 27px;
+      border-radius: 50%;
+      margin-left: 7px;
+      display: none;
+      color: white;
+      border: black;
+    }
+
+
+
+
+    .add {
+      background-color: rgba(105, 63, 173, 0.247);
+      border: none;
+      color: white;
+      font-size: 15px;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      margin-left: 25px;
+    }
+
+
+
+    .density,.visual {
+      background-color: rgb(73, 117, 161);
+      color: white;
+      border: black;
+      cursor: pointer;
+    }
+
+
+
+
+
+.pagination li:first-child::before{
+  font-family:FontAwesome;
+  content:"\f100";
+}
+
+.pagination li:last-child::after{
+  font-family:FontAwesome;
+  content:"\f101";
+}
+
+
+  .pagination li{
+    margin-top:-10px;
+  margin-left:-10px;
+  cursor: pointer;
+  float: left;
+  padding:10px;
+  list-style-type:none;
+  border:2px lightgreen;
+  border-collapse:block;
+  
+}
+.pagination li:hover{
+background-color: lightgreen;
+}
+
+  </style>
+  <script>
+   window.addEventListener('load', function(){
+
+
+    getPagination('#table');
+	$('#maxRows').trigger('change');
+	function getPagination (table){
+		  $('#maxRows').on('change',function(){
+		  	$('.pagination').html('');					
+		  	var trnum=0;								
+		  	var maxRows = parseInt($(this).val());
+		  	var totalRows = $(table+' tbody tr').length;
+			 $(table+' tr:gt(2)').each(function(){			
+			 	trnum++;								
+			 	if (trnum > maxRows){						
+			 		$(this).hide();							
+			 	}if (trnum <= maxRows ){$(this).show();}
+			 });											
+			 if (totalRows > maxRows){				
+			 	var pagenum = Math.ceil(totalRows/maxRows);	
+			 												
+			 	for (var i = 1; i <= pagenum ;){		
+			 	$('.pagination').append('<li data-page="'+i+'">\
+								      <span>'+ i++ +'<span class="sr-only">(current)</span></span>\
+								    </li>').show();
+			 	}											  
+			} 												
+		
+        
+        
+       
+       showig_rows_count(maxRows, 1, totalRows);
+       
+
+        $('.pagination li').on('click',function(e){		
+        e.preventDefault();
+				var pageNum = $(this).attr('data-page');	
+				var trIndex = 0 ;							
+				$('.pagination li').removeClass('active');	
+				$(this).addClass('active');					
+       showig_rows_count(maxRows, pageNum, totalRows);
+        
+				 $(table+' tr:gt(2)').each(function(){		
+				 	trIndex++;						
+				 	if ( trIndex <= ((maxRows*pageNum)-maxRows)){
+				 		$(this).hide();		
+				 	}else {$(this).show();} 		
+				 }); 									
+					});									
+		});
+										
+	}	
+
+function showig_rows_count(maxRows, pageNum, totalRows) {
+        var end_index = maxRows*pageNum;
+        var start_index = ((maxRows*pageNum)- maxRows) + parseInt(1);
+             
+}
+
+
+
+var tables = document.getElementsByTagName('table');
+resizableGrid(tables[1]);
+
+
+
+function resizableGrid(table) {
+ var row = table.getElementsByTagName('tr')[0],
+ cols = row.children;
+ 
+ var tableHeight = table.height;
+ for (var i=0;i<cols.length;i++){
+  var div = createDiv(tableHeight);
+  cols[i].appendChild(div);
+  cols[i].style.position = 'relative';
+  setListeners(div);
+ }
+
+ function setListeners(div){
+  var pageX,curCol,nxtCol,curColWidth,nxtColWidth;
+
+  div.addEventListener('mouseover', function (e) {
+   e.target.style.borderRight = '3px solid  #00bfff';
+  })
+
+  div.addEventListener('mouseout', function (e) {
+   e.target.style.borderRight = '';
+  })
+
+  div.addEventListener('mousedown', function (e) {
+   curCol = e.target.parentElement;
+   nxtCol = curCol.nextElementSibling;
+   pageX = e.pageX; 
+   var padding = paddingDiff(curCol);
+   curColWidth = curCol.offsetWidth - padding;
+  });
+
+  document.addEventListener('mousemove', function (e) {
+   if (curCol) {
+    var diffX = e.pageX - pageX;
+    curCol.style.width = (curColWidth + diffX)+'px';
+   }
+  });
+
+  document.addEventListener('mouseup', function (e) { 
+   curCol = 0;
+   nxtCol =0;
+   pageX =0;
+   nxtColWidth =0;
+   curColWidth = 0;
+  });
+ }
+ 
+ function createDiv(height){
+  var div = document.createElement('div');
+  div.style.top = 0;
+  div.style.right = 0;
+  div.style.width = '5px';
+  div.style.position = 'absolute';
+  div.style.cursor = 'e-resize';
+  div.style.userSelect = 'none';
+  div.style.height = '100px';
+  return div;
+ }
+ 
+ function paddingDiff(col){
+  var padLeft = getStyleVal(col,'padding-left');
+  var padRight = getStyleVal(col,'padding-right');
+  return (parseInt(padLeft) + parseInt(padRight));
+ }
+
+ function getStyleVal(elm,pad){
+  return (window.getComputedStyle(elm).getPropertyValue(pad))
+ }
+};});
+
+
+    // var records, asc1 = 1,
+    //   asc2 = 1,
+    //   asc3 = 1,
+    //   asc4 = 1,
+    //   asc5 = 1,
+    //   asc6 = 1,
+    //   asc7 = 1,
+    //   asc8 = 1;
+    // window.onload = function () {
+    //   records = document.getElementById("records");
+    // }
+
+    // function sort_table(tbody, col, asc) {
+    //   var rows = tbody.rows,
+    //     rlen = rows.length,
+    //     arr = new Array(),
+    //     i, j, cells, clen;
+
+    //   for (i = 0; i < rlen; i++) {
+    //     cells = rows[i].cells;
+    //     clen = cells.length;
+
+    //     arr[i] = new Array();
+    //     for (j = 0; j < clen; j++) {
+    //       arr[i][j] = cells[j].innerHTML;
+    //     }
+    //   }
+
+    //   arr.sort(function (a, b) {
+    //     return (a[col] == b[col]) ? 0 : ((a[col] > b[col]) ? asc : -1 * asc);
+    //   });
+    //   for (i = 0; i < rlen; i++) {
+    //     rows[i].innerHTML = "<td>" + arr[i].join("</td><td>") + "</td>";
+    //   }
+    //   var h = document.getElementsByTagName('table');
+    //   h[1].style.height = "900px";
+    // }
+
+
+
+
+    function show_icons(x) {
+
+       document.getElementById("delete_button" + x).style.display = "block";
+
+    }
+
+
+
+    function hide_icons(x) {
+  
+       document.getElementById("delete_button" + x).style.display = "none";
+    }
+
+
+
+
+    function delete_row(no) {
+      document.getElementById("row" + no).outerHTML = "";
+    }
+
+
+
+
+
+    var get_edit_val;
+    function edit_row(no,id){
+      document.getElementById("save_button" + no).style.display = "block";
+      var val = document.getElementById(id);
+      var val_data = val.innerHTML;
+      val.innerHTML = "<input type='text'style='width:100px;'id='val_text" + no + "' value='" + val_data + "'>";
+      get_edit_val=id;
+      var input = document.getElementById("val_text"+no);
+  input.addEventListener("keyup", function(event) {
+  if (event.keyCode === 13){
+  var sav= document.getElementById("save_button"+no).click();;
+  }
+});
+    }
+
+
+
+    function save_row(no) {
+      var val = document.getElementById("val_text" + no).value;
+      document.getElementById(get_edit_val).innerHTML =val;
+      document.getElementById("save_button" + no).style.display = "none";
+        get_edit_val=0;
+    }
+
+   
+    function add_row() {
+      var new_name = document.getElementById("new_name").value;
+      var new_roll = document.getElementById("new_roll").value;
+      var new_age = document.getElementById("new_age").value;
+      var new_dept = document.getElementById("new_dept").value;
+      var new_clg = document.getElementById("new_clg").value;
+      var new_country = document.getElementById("new_country").value;
+
+
+      var table = document.getElementsByTagName("tbody");
+      var table_len = (table[0].rows.length) - 1;
+      var table_sno = table_len + 1;
+      var row = table[0].insertRow(table_len).outerHTML = "<tr id='row" + table_sno + "'><th>" + table_sno +
+        "</th><td id='name_row" + table_sno + "' style='cursor:pointer;' ondblclick='edit_row("+table_sno+","+this.id+")'>" + new_name + "</td><td id='roll_row" + table_sno + "' style='cursor:pointer;' ondblclick='edit_row("+table_sno+","+this.id+")'>" + new_roll +
+        "</td><td id='age_row" + table_sno + "' style='cursor:pointer;' ondblclick='edit_row("+table_sno+","+this.id+")'>" + new_age + "</td><td id='dept_row" + table_sno + "' style='cursor:pointer;' ondblclick='edit_row("+table_sno+","+this.id+")'>" + new_dept +
+        "</td><td id='clg_row" + table_sno + "' style='cursor:pointer;' ondblclick='edit_row("+table_sno+","+this.id+")'>" + new_clg + "</td><td id='country_row" + table_sno + "' style='cursor:pointer;' ondblclick='edit_row("+table_sno+","+this.id+")'>" +
+        new_country + "</td><td><button type='button' id='edit_button" + table_sno +
+        "' value='Edit' class='edit' onclick='edit_row(" + table_sno + ")'></button> <button type='button' id='save_button" +
+        table_sno + "' value='Save' class='save' onclick='save_row(" + table_sno +
+        ")'></button> <button type='button' value='Delete' class='delete' onclick='delete_row(" + table_sno + ")'><i class='fa fa-trash'></button></td></tr>";
+
+      document.getElementById("new_name").value = "";
+      document.getElementById("new_roll").value = "";
+      document.getElementById("new_age").value = "";
+      document.getElementById("new_dept").value = "";
+      document.getElementById("new_clg").value = "";
+      document.getElementById("new_country").value = "";
+    }
+
+
+
+
+
+    function searching(k) {
+      var input, filter, table, tr, td, i, txtValue;
+      input = document.getElementById("myInput" + k);
+      filter = input.value.toUpperCase();
+      table = document.getElementsByTagName("table");
+      tr = table[1].getElementsByTagName("tr");
+      for (i = 0; i < tr.length; i++) {
+        td = tr[i].getElementsByTagName("td")[k];
+        if (td) {
+          txtValue = td.textContent || td.innerText;
+          if (txtValue.toUpperCase().indexOf(filter) > -1) {
+            tr[i].style.display = "";
+          } else {
+            tr[i].style.display = "none";
+          }
+        }
+      }
+    }
+
+
+
+
+
+
+    // function density(i) {
+    //   switch (i) {
+    //     case 1:
+    //       var t = document.getElementsByTagName('div');
+    //       t[1].style.height = "300px";
+    //       break;
+    //     case 2:
+    //       var t = document.getElementsByTagName('div');
+    //       t[1].style.height = "700px";
+    //       break;
+    //     case 3:
+    //       var t = document.getElementsByTagName('div');
+    //       t[1].style.height = "900px";
+    //       break;
+    //   }
+
+    // }
+
+
+
+
+/*
+    var csecount1=0,csecount2=0,csecount3=0,eeecount1=0,eeecount2=0,eeecount3=0,ececount1=0,ececount2=0,ececount3=0;
+     function get_val(){
+       $("#datatable").empty();
+     var table = document.getElementsByTagName("table");
+      var tr1 = table[1].getElementsByTagName("tr");
+      for (var i = 2; i < tr1.length-1; i++) {
+       var age=document.getElementById("table").rows[i].cells[3].innerHTML;
+       var dept=document.getElementById("table").rows[i].cells[4].innerHTML;
+
+       if(age=='20'&&dept=='CSE'){
+        csecount1++;   
+      }
+      if(age=='21'&&dept=='CSE'){
+        csecount2++;
+      }
+      if(age=='22'&&dept=='CSE'){
+        csecount3++;
+      }
+      if(age=='20'&&dept=='ECE'){
+        ececount1++;
+      }
+      if(age=='21'&&dept=='ECE'){
+        ececount2++;
+      }
+      if(age=='22'&&dept=='ECE'){
+        ececount3++;
+      }
+      if(age=='20'&&dept=='EEE'){
+        eeecount1++;
+      }
+      if(age=='21'&&dept=='EEE'){
+        eeecount2++;
+      }
+      if(age=='22'&&dept=='EEE'){
+        eeecount3++;
+      }
+  
+      }
+      var table1 = document.getElementById('datatable');
+      var tr = document.createElement('tr');   
+    var th0=document.createElement('th');
+    var th1=document.createElement('th');
+    var th2=document.createElement('th');
+    var th3=document.createElement('th');
+    var text1 = document.createTextNode('');
+    var text2 = document.createTextNode('20');
+    var text3 = document.createTextNode('21');
+    var text4 = document.createTextNode('22');
+    th0.appendChild(text1);
+    th1.appendChild(text2);
+    th2.appendChild(text3);
+    th3.appendChild(text4);
+    tr.appendChild(th0);
+    tr.appendChild(th1);
+    tr.appendChild(th2);
+    tr.appendChild(th3);
+    table1.appendChild(tr);
+    
+for (var i = 1; i < 4; i++){
+    var tr = document.createElement('tr');   
+    var th=document.createElement('th');
+    var td1 = document.createElement('td');
+    var td2 = document.createElement('td');
+    var td3 = document.createElement('td');
+    if(i===1){
+      var headval=document.createTextNode('CSE');
+    var text1 = document.createTextNode(csecount1);
+    var text2 = document.createTextNode(csecount2);
+    var text3 = document.createTextNode(csecount3);}
+    if(i===2){
+      var headval=document.createTextNode('ECE');
+      var text1 = document.createTextNode(eeecount1);
+    var text2 = document.createTextNode(eeecount2);
+    var text3 = document.createTextNode(eeecount3);
+    }
+    if(i===3){
+      var headval=document.createTextNode('EEE');
+      var text1 = document.createTextNode(ececount1);
+    var text2 = document.createTextNode(ececount2);
+    var text3 = document.createTextNode(ececount3);
+    }
+    th.appendChild(headval);
+    td1.appendChild(text1);
+    td2.appendChild(text2);
+    td3.appendChild(text3);
+    tr.appendChild(th);
+    tr.appendChild(td1);
+    tr.appendChild(td2);
+    tr.appendChild(td3);
+
+    table1.appendChild(tr);
+}
+document.body.appendChild(table1);
+
+
+$(document).ready(function() {
+            var data = {
+               table: 'datatable'
+            };
+            var chart = {
+               type: 'column'
+            };
+           var title = {
+             text: 'Data extracted from a STUDENTS table in the page'   
+            };      
+            var yAxis = {
+               allowDecimals: false,
+              title: {
+                 text: 'Age'
+              }
+           };
+         var tooltip = {
+               formatter: function () {
+                return '<b>'+'AGE:' + this.series.name + '</b><br/>' +
+                    this.point.y + ' STUDENTS IN ' + '<b>'+this.point.name.toUpperCase()+'</b>';
+              }
+           };
+            var credits = {
+               enabled: false
+           }; 
+        
+            var json = {};   
+            json.chart = chart; 
+            json.title = title; 
+            json.data = data;
+            json.yAxis = yAxis;
+            json.credits = credits;  
+            json.tooltip = tooltip;  
+           $('#container').highcharts(json);
+         });
+        
+
+     }*/
+
+
+
+    
+  </script>
+
+</head>
+<body>
+    <div id = "container" style="height:400px; width:500px;float:right;"></div>
+    
+    <table id = "datatable" style="display:none;">
+     </table>
+
+  <div>
+    <table id="table">
+      <thead>
+        <tr class="first_row">
+          <th></th>
+          <th></th>
+          <th></th>
+          <th></th>
+          <th></th>
+          <th></th>
+          <th></th>
+          <th></th>
+        </tr>
+        <tr>
+            <th>Select<select class  ="form-control" name="state" id="maxRows">
+                <option value="10">10</option>
+                <option value="15">15</option>
+                <option value="20">20</option>
+                <option value="50">25</option>
+               <option value="5000">ALL</option>
+               </select></th>
+          <!-- <th><button type="button" class="visual"onclick=" get_val();"><i class="fa fa-bar-chart" aria-hidden="true"></i> Visualize</button></th> -->
+          <th><input type="text" style="width:90px;" id="myInput0" onkeyup="searching(0);" placeholder="search"></th>
+          <th><input type="text" style="width:90px;" id="myInput1" onkeyup="searching(1);" placeholder="search"></th>
+          <th><input type="text" style="width:90px;" id="myInput2" onkeyup="searching(2);" placeholder="search"></th>
+          <th><input type="text" style="width:90px;" id="myInput3" onkeyup="searching(3);" placeholder="search "></th>
+          <th><input type="text" style="width:90px;" id="myInput4" onkeyup="searching(4);" placeholder="search"></th>
+          <th><input type="text" style="width:90px;" id="myInput5" onkeyup="searching(5);" placeholder="search"></th>
+          <th><!-- <th><button type="button" class="density" style="font-size:10px;" onclick="density(1);"><i
+                class="fa fa-align-justify" aria-hidden="true"></i></button>
+            <button type="button" class="density" style="font-size:12px;" onclick="density(2);"><i
+                class="fa fa-align-justify" aria-hidden="true"></i></button>
+            <button type="button" class="density" style="font-size:14px;" onclick="density(3);"><i
+                class="fa fa-align-justify" aria-hidden="true"></i></button></th> --></th>
+        </tr>
+        <tr>
+          <th style="text-align:center;"onclick="sort_table(records ,0 ,asc1); asc1*=-1; asc2=1; asc3=1; asc4=1; asc5=1; asc6=1;asc7=1;asc8=1;">SNo</th>
+          <th onclick="sort_table(records, 1 ,asc2); asc2*=-1; asc3=1; asc4=1; asc5=1; asc6=1; asc1=1;asc7=1;asc8=1;">Name</th>
+          <th onclick="sort_table(records, 2 ,asc3); asc3*=-1; asc4=1; asc5=1; asc6=1; asc1=1; asc2=1;asc7=1;asc8=1;">RegNo</th>
+          <th onclick="sort_table(records, 3 ,asc4); asc4*=-1; asc5=1; asc6=1; asc1=1; asc2=1; asc3=1;asc7=1;asc8=1;">Age</th>
+          <th onclick="sort_table(records, 4 ,asc5); asc5*=-1; asc6=1; asc1=1; asc2=1; asc3=1; asc4=1;asc7=1;asc8=1;">Dept</th>
+          <th onclick="sort_table(records, 5 ,asc6); asc6*=-1; asc1=1; asc2=1; asc3=1; asc4=1; asc5=1;asc7=1;acs8=1;">College</th>
+          <th onclick="sort_table(records, 6 ,asc7); asc7*=-1; asc1=1; asc2=1; asc3=1; asc4=1; asc5=1;asc6=1;acs8=1;">City</th>
+          <th>InlineEdit</th>
+
+        </tr>
+
+      </thead>
+      <tbody id="records">
+
+          <tr id="row1" onmouseover="show_icons('1')" onmouseout="hide_icons('1')">
+          <th>1</th>
+          <td id="name_row1"style="cursor:pointer;" ondblclick="edit_row('1',this.id)" >Ram</td>
+          <td id="roll_row1" style="cursor:pointer;"ondblclick="edit_row('1',this.id)" >40022</td>
+          <td id="age_row1" style="cursor:pointer;"ondblclick="edit_row('1',this.id)" >21</td>
+          <td id="dept_row1" style="cursor:pointer;"ondblclick="edit_row('1',this.id)" >ECE</td>
+          <td id="clg_row1" style="cursor:pointer;"ondblclick="edit_row('1',this.id)" >KCT</td>
+          <td id="country_row1" style="cursor:pointer;"ondblclick="edit_row('1',this.id)" >Erode</td>
+          <td> <button type="button" style="cursor: pointer; " id="edit_button1" class="edit"  ondblclick="edit_row('1')"><i
+                class="fa fa-edit"></i></button>
+            <button type="button" style="cursor: pointer" id="save_button1" value="Save" class="save"
+              onclick="save_row('1')"><i class="fa fa-save"></i></button>
+            <button type="button" style="cursor: pointer; " value="Delete" id="delete_button1" class="delete"
+              onclick="delete_row('1')"><i class="fa fa-trash"></i></button></td>
+        </tr>
+        
+        <tr id="row2" onmouseover="show_icons('2')" onmouseout="hide_icons('2')">
+          <th>2</th>
+          <td id="name_row2" style="cursor:pointer;" ondblclick="edit_row('2',this.id)">Siva</td>
+          <td id="roll_row2"style="cursor:pointer;" ondblclick="edit_row('2',this.id)">40056</td>
+          <td id="age_row2"style="cursor:pointer;" ondblclick="edit_row('2',this.id)">21</td>
+          <td id="dept_row2"style="cursor:pointer;" ondblclick="edit_row('2',this.id)">EEE</td>
+          <td id="clg_row2"style="cursor:pointer;" ondblclick="edit_row('2',this.id)">KCT</td>
+          <td id="country_row2"style="cursor:pointer;" ondblclick="edit_row('2',this.id)">CBE</td>
+          <td><button type="button" style="cursor: pointer;" id="edit_button2" value="Edit" class="edit"
+              onclick="edit_row('2')"><i class="fa fa-edit"></i></button>
+            <button type="button" style="cursor: pointer; display:none;" id="save_button2" value="Save" class="save"
+              onclick="save_row('2')"><i class="fa fa-save"></i></button>
+            <button type="button" style="cursor: pointer;" value="Delete" id="delete_button2" class="delete"
+              onclick="delete_row('2')"><i class="fa fa-trash"></i></button></td>
+        </tr>
+
+        <tr id="row3" onmouseover="show_icons('3')" onmouseout="hide_icons('3')">
+          <th>3</th>
+          <td id="name_row3"style="cursor:pointer;" ondblclick="edit_row('3',this.id)">Gokul</td>
+          <td id="roll_row3"style="cursor:pointer;" ondblclick="edit_row('3',this.id)">40037</td>
+          <td id="age_row3"style="cursor:pointer;" ondblclick="edit_row('3',this.id)">20</td>
+          <td id="dept_row3"style="cursor:pointer;" ondblclick="edit_row('3',this.id)">CSE</td>
+          <td id="clg_row3"style="cursor:pointer;" ondblclick="edit_row('3',this.id)">UCLA</td>
+          <td id="country_row3"style="cursor:pointer;" ondblclick="edit_row('3',this.id)">Chennai</td>
+          <td><button type="button" style="cursor: pointer;" id="edit_button3" value="Edit" class="edit"
+              onclick="edit_row('3')"><i class="fa fa-edit"></i></button>
+            <button type="button" style="display:none;cursor: pointer;" id="save_button3" value="Save" class="save"
+              onclick="save_row('3')"><i class="fa fa-save"></i></button>
+            <button type="button" style="cursor: pointer;" value="Delete" id="delete_button3" class="delete"
+              onclick="delete_row('3')"><i class="fa fa-trash"></i></button></td>
+        </tr>
+
+        <tr id="row4" onmouseover="show_icons('4')" onmouseout="hide_icons('4')">
+          <th>4</th>
+          <td id="name_row4"style="cursor:pointer;" ondblclick="edit_row('4',this.id)">kathir</td>
+          <td id="roll_row4"style="cursor:pointer;" ondblclick="edit_row('4',this.id)">40054</td>
+          <td id="age_row4"style="cursor:pointer;" ondblclick="edit_row('4',this.id)">21</td>
+          <td id="dept_row4"style="cursor:pointer;" ondblclick="edit_row('4',this.id)">CSE</td>
+          <td id="clg_row4"style="cursor:pointer;" ondblclick="edit_row('4',this.id)">SKCT</td>
+          <td id="country_row4"style="cursor:pointer;" ondblclick="edit_row('4',this.id)">CBE</td>
+          <td><button type="button" style="cursor: pointer;" id="edit_button4" value="Edit" class="edit"
+              onclick="edit_row('4')"><i class="fa fa-edit"></i></button>
+            <button type="button" style="display:none;cursor: pointer;" id="save_button4" value="Save" class="save"
+              onclick="save_row('4')"><i class="fa fa-save"></i></button>
+            <button type="button" style="cursor: pointer;" value="Delete" id="delete_button4" class="delete"
+              onclick="delete_row('4')"><i class="fa fa-trash"></i></button></td>
+        </tr>
+
+        <tr id="row5" onmouseover="show_icons('5')" onmouseout="hide_icons('5')">
+          <th>5</th>
+          <td id="name_row5"style="cursor:pointer;" ondblclick="edit_row('5',this.id)">karthi</td>
+          <td id="roll_row5"style="cursor:pointer;" ondblclick="edit_row('5',this.id)">40006</td>
+          <td id="age_row5"style="cursor:pointer;" ondblclick="edit_row('5',this.id)">22</td>
+          <td id="dept_row5"style="cursor:pointer;" ondblclick="edit_row('5',this.id)">CSE</td>
+          <td id="clg_row5"style="cursor:pointer;" ondblclick="edit_row('5',this.id)">KPR</td>
+          <td id="country_row5"style="cursor:pointer;" ondblclick="edit_row('5',this.id)">Chennai</td>
+          <td><button type="button" style="cursor: pointer;" id="edit_button5" value="Edit" class="edit"
+              onclick="edit_row('5')"><i class="fa fa-edit"></i></button>
+            <button type="button" style="display:none;cursor: pointer;" id="save_button5" value="Save" class="save"
+              onclick="save_row('5')"><i class="fa fa-save"></i></button>
+            <button type="button" style="cursor: pointer;" value="Delete" id="delete_button5" class="delete"
+              onclick="delete_row('5')"><i class="fa fa-trash"></i></button></td>
+        </tr>
+        <tr id="row6" onmouseover="show_icons('6')" onmouseout="hide_icons('6')">
+          <th>6</th>
+          <td id="name_row6"style="cursor:pointer;" ondblclick="edit_row('6',this.id)">Ram</td>
+          <td id="roll_row6"style="cursor:pointer;" ondblclick="edit_row('6',this.id)">40022</td>
+          <td id="age_row6"style="cursor:pointer;" ondblclick="edit_row('6',this.id)">20</td>
+          <td id="dept_row6"style="cursor:pointer;" ondblclick="edit_row('6',this.id)">ECE</td>
+          <td id="clg_row6"style="cursor:pointer;" ondblclick="edit_row('6',this.id)">KCT</td>
+          <td id="country_row6"style="cursor:pointer;" ondblclick="edit_row('6',this.id)">Erode</td>
+          <td><button type="button" style="cursor: pointer;" id="edit_button6" value="Edit" class="edit"
+              onclick="edit_row('6')"><i class="fa fa-edit"></i></button>
+            <button type="button" style="display:none;cursor: pointer;" id="save_button6" value="Save" class="save"
+              onclick="save_row('6')"><i class="fa fa-save"></i></button>
+            <button type="button" style="cursor: pointer;" value="Delete" id="delete_button6" class="delete"
+              onclick="delete_row('6')"><i class="fa fa-trash"></i></button></td>
+        </tr>
+        <tr id="row7" onmouseover="show_icons('7')" onmouseout="hide_icons('7')">
+          <th>7</th>
+          <td id="name_row7"style="cursor:pointer;" ondblclick="edit_row('7',this.id)">Siva</td>
+          <td id="roll_row7"style="cursor:pointer;" ondblclick="edit_row('7',this.id)">40063</td>
+          <td id="age_row7"style="cursor:pointer;" ondblclick="edit_row('7',this.id)">20</td>
+          <td id="dept_row7"style="cursor:pointer;" ondblclick="edit_row('7',this.id)">EEE</td>
+          <td id="clg_row7"style="cursor:pointer;" ondblclick="edit_row('7',this.id)">MCT</td>
+          <td id="country_row7"style="cursor:pointer;" ondblclick="edit_row('7',this.id)">CBE</td>
+          <td> <button type="button" style="cursor: pointer;" id="edit_button7" value="Edit" class="edit"
+              onclick="edit_row('7')"><i class="fa fa-edit"></i></button>
+            <button type="button" style="display:none;cursor: pointer;" id="save_button7" value="Save" class="save"
+              onclick="save_row('7')"><i class="fa fa-save"></i></button>
+            <button type="button" style="cursor: pointer;" value="Delete" id="delete_button7" class="delete"
+              onclick="delete_row('7')"><i class="fa fa-trash"></i></button></td>
+        </tr>
+
+        <tr id="row8" onmouseover="show_icons('8')" onmouseout="hide_icons('8')">
+          <th>8</th>
+          <td id="name_row8"style="cursor:pointer;" ondblclick="edit_row('8',this.id)">Gokul</td>
+          <td id="roll_row8"style="cursor:pointer;" ondblclick="edit_row('8',this.id)">40037</td>
+          <td id="age_row8"style="cursor:pointer;" ondblclick="edit_row('8',this.id)">20</td>
+          <td id="dept_row8"style="cursor:pointer;" ondblclick="edit_row('8',this.id)">CSE</td>
+          <td id="clg_row8"style="cursor:pointer;" ondblclick="edit_row('8',this.id)">UCLA</td>
+          <td id="country_row8"style="cursor:pointer;" ondblclick="edit_row('8',this.id)">Chennai</td>
+          <td> <button type="button" style="cursor: pointer;" id="edit_button8" value="Edit" class="edit"
+              onclick="edit_row('8')"><i class="fa fa-edit"></i></button>
+            <button type="button" style="display:none;cursor: pointer;" id="save_button8" value="Save" class="save"
+              onclick="save_row('8')"><i class="fa fa-save"></i></button>
+            <button type="button" style="cursor: pointer;" value="Delete" id="delete_button8" class="delete"
+              onclick="delete_row('8')"><i class="fa fa-trash"></i></button></td>
+        </tr>
+
+        <tr id="row9" onmouseover="show_icons('9')" onmouseout="hide_icons('9')">
+          <th>9</th>
+          <td id="name_row9"style="cursor:pointer;" ondblclick="edit_row('9',this.id)">kathir</td>
+          <td id="roll_row9"style="cursor:pointer;" ondblclick="edit_row('9',this.id)">40054</td>
+          <td id="age_row9"style="cursor:pointer;" ondblclick="edit_row('9',this.id)">21</td>
+          <td id="dept_row9"style="cursor:pointer;" ondblclick="edit_row('9',this.id)">CSE</td>
+          <td id="clg_row9"style="cursor:pointer;" ondblclick="edit_row('9',this.id)">SKCT</td>
+          <td id="country_row9"style="cursor:pointer;" ondblclick="edit_row('9',this.id)">Erode</td>
+          <td><button type="button" style="cursor: pointer;" id="edit_button9" value="Edit" class="edit"
+              onclick="edit_row('9')"><i class="fa fa-edit"></i></button>
+            <button type="button" style="display:none;cursor: pointer;" id="save_button9" value="Save" class="save"
+              onclick="save_row('9')"><i class="fa fa-save"></i></button>
+            <button type="button" style="cursor: pointer;" value="Delete" id="delete_button9" class="delete"
+              onclick="delete_row('9')"><i class="fa fa-trash"></i></button></td>
+        </tr>
+
+        <tr id="row10" onmouseover="show_icons('10')" onmouseout="hide_icons('10')">
+          <th>10</th>
+          <td id="name_row10"style="cursor:pointer;" ondblclick="edit_row('10',this.id)">karthi</td>
+          <td id="roll_row10"style="cursor:pointer;" ondblclick="edit_row('10',this.id)">40006</td>
+          <td id="age_row10"style="cursor:pointer;" ondblclick="edit_row('10',this.id)">22</td>
+          <td id="dept_row10"style="cursor:pointer;" ondblclick="edit_row('10',this.id)">CSE</td>
+          <td id="clg_row10"style="cursor:pointer;" ondblclick="edit_row('10',this.id)">KPR</td>
+          <td id="country_row10"style="cursor:pointer;" ondblclick="edit_row('10',this.id)">CBE</td>
+          <td><button type="button" style="cursor: pointer;" id="edit_button10" value="Edit" class="edit"
+              onclick="edit_row('10')"><i class="fa fa-edit"></i></button>
+            <button type="button" style="display:none;cursor: pointer;" id="save_button10" value="Save" class="save"
+              onclick="save_row('10')"><i class="fa fa-save"></i></button>
+            <button type="button" style="cursor: pointer;" value="Delete" id="delete_button10" class="delete"
+              onclick="delete_row('10')"><i class="fa fa-trash"></i></button></td>
+        </tr>
+        <tr id="row11" onmouseover="show_icons('11')" onmouseout="hide_icons('11')">
+          <th>11</th>
+          <td id="name_row11"style="cursor:pointer;" ondblclick="edit_row('11',this.id)">karthi</td>
+          <td id="roll_row11"style="cursor:pointer;" ondblclick="edit_row('11',this.id)">40006</td>
+          <td id="age_row11"style="cursor:pointer;" ondblclick="edit_row('11',this.id)">22</td>
+          <td id="dept_row11"style="cursor:pointer;" ondblclick="edit_row('11',this.id)">CSE</td>
+          <td id="clg_row11"style="cursor:pointer;" ondblclick="edit_row('11',this.id)">KPR</td>
+          <td id="country_row11"style="cursor:pointer;" ondblclick="edit_row('11',this.id)">Chennai</td>
+          <td><button type="button" style="cursor: pointer;" id="edit_button11" value="Edit" class="edit"
+              onclick="edit_row('11')"><i class="fa fa-edit"></i></button>
+            <button type="button" style="display:none;cursor: pointer;" id="save_button11" value="Save" class="save"
+              onclick="save_row('11')"><i class="fa fa-save"></i></button>
+            <button type="button" style="cursor: pointer;" value="Delete" id="delete_button11" class="delete"
+              onclick="delete_row('11')"><i class="fa fa-trash"></i></button></td>
+        </tr>
+        <tr id="row12" onmouseover="show_icons('12')" onmouseout="hide_icons('12')">
+          <th>12</th>
+          <td id="name_row12"style="cursor:pointer;" ondblclick="edit_row('12',this.id)">Ram</td>
+          <td id="roll_row12"style="cursor:pointer;" ondblclick="edit_row('12',this.id)">40022</td>
+          <td id="age_row12"style="cursor:pointer;" ondblclick="edit_row('12',this.id)">22</td>
+          <td id="dept_row12"style="cursor:pointer;" ondblclick="edit_row('12',this.id)">ECE</td>
+          <td id="clg_row12"style="cursor:pointer;" ondblclick="edit_row('12',this.id)">KCT</td>
+          <td id="country_row12"style="cursor:pointer;" ondblclick="edit_row('12',this.id)">CBE</td>
+          <td><button type="button" style="cursor: pointer;" id="edit_button12" value="Edit" class="edit"
+              onclick="edit_row('12')"><i class="fa fa-edit"></i></button>
+            <button type="button" style="display:none;cursor: pointer;" id="save_button12" value="Save" class="save"
+              onclick="save_row('12')"><i class="fa fa-save"></i></button>
+            <button type="button" style="cursor: pointer;" value="Delete" id="delete_button12" class="delete"
+              onclick="delete_row('12')"><i class="fa fa-trash"></i></button></td>
+        </tr>
+
+        <tr id="row13" onmouseover="show_icons('13')" onmouseout="hide_icons('13')">
+          <th>13</th>
+          <td id="name_row13"style="cursor:pointer;" ondblclick="edit_row('13',this.id)">Siva</td>
+          <td id="roll_row13"style="cursor:pointer;" ondblclick="edit_row('13',this.id)">40063</td>
+          <td id="age_row13"style="cursor:pointer;" ondblclick="edit_row('13',this.id)">22</td>
+          <td id="dept_row13"style="cursor:pointer;" ondblclick="edit_row('13',this.id)">EEE</td>
+          <td id="clg_row13"style="cursor:pointer;" ondblclick="edit_row('13',this.id)">MCT</td>
+          <td id="country_row13"style="cursor:pointer;" ondblclick="edit_row('13',this.id)">Erode</td>
+          <td><button type="button" style="cursor: pointer;" id="edit_button13" value="Edit" class="edit"
+              onclick="edit_row('13')"><i class="fa fa-edit"></i></button>
+            <button type="button" style="display:none;cursor: pointer;" id="save_button13" value="Save" class="save"
+              onclick="save_row('13')"><i class="fa fa-save"></i></button>
+            <button type="button" style="cursor: pointer;" value="Delete" id="delete_button13" class="delete"
+              onclick="delete_row('13')"><i class="fa fa-trash"></i></button></td>
+        </tr>
+
+        <tr id="row14" onmouseover="show_icons('14')" onmouseout="hide_icons('14')">
+          <th>14</th>
+          <td id="name_row14"style="cursor:pointer;" ondblclick="edit_row('14',this.id)">Gokul</td>
+          <td id="roll_row14"style="cursor:pointer;" ondblclick="edit_row('14',this.id)">40037</td>
+          <td id="age_row14"style="cursor:pointer;" ondblclick="edit_row('14',this.id)">20</td>
+          <td id="dept_row14"style="cursor:pointer;" ondblclick="edit_row('14',this.id)">CSE</td>
+          <td id="clg_row14"style="cursor:pointer;" ondblclick="edit_row('14',this.id)">UCLA</td>
+          <td id="country_row14"style="cursor:pointer;" ondblclick="edit_row('14',this.id)">CBE</td>
+          <td><button type="button" style="cursor: pointer;" id="edit_button14" value="Edit" class="edit"
+              onclick="edit_row('14')"><i class="fa fa-edit"></i></button>
+            <button type="button" style="display:none;cursor: pointer;" id="save_button14" value="Save" class="save"
+              onclick="save_row('14')"><i class="fa fa-save"></i></button>
+            <button type="button" style="cursor: pointer;" value="Delete" id="delete_button14" class="delete"
+              onclick="delete_row('14')"><i class="fa fa-trash"></i></button></td>
+        </tr>
+
+        <tr id="row15" onmouseover="show_icons('15')" onmouseout="hide_icons('15')">
+          <th>15</th>
+          <td id="name_row15"style="cursor:pointer;" ondblclick="edit_row('15',this.id)">kathir</td>
+          <td id="roll_row15"style="cursor:pointer;" ondblclick="edit_row('15',this.id)">40054</td>
+          <td id="age_row15"style="cursor:pointer;" ondblclick="edit_row('15',this.id)">21</td>
+          <td id="dept_row15"style="cursor:pointer;" ondblclick="edit_row('15',this.id)">CSE</td>
+          <td id="clg_row15"style="cursor:pointer;" ondblclick="edit_row('15',this.id)">SKCT</td>
+          <td id="country_row15"style="cursor:pointer;" ondblclick="edit_row('15',this.id)">CBE</td>
+          <td><button type="button" style="cursor: pointer;" id="edit_button15" value="Edit" class="edit"
+              onclick="edit_row('15')"><i class="fa fa-edit"></i></button>
+            <button type="button" style="display:none;cursor: pointer;" id="save_button15" value="Save" class="save"
+              onclick="save_row('15')"><i class="fa fa-save"></i></button>
+            <button type="button" style="cursor: pointer;" value="Delete" id="delete_button15" class="delete"
+              onclick="delete_row('15')"><i class="fa fa-trash"></i></button></td>
+        </tr>
+
+        <tr id="row16" onmouseover="show_icons('16')" onmouseout="hide_icons('16')">
+          <th>16</th>
+          <td id="name_row16"style="cursor:pointer;" ondblclick="edit_row('16',this.id)">karthi</td>
+          <td id="roll_row16"style="cursor:pointer;" ondblclick="edit_row('16',this.id)">40006</td>
+          <td id="age_row16"style="cursor:pointer;" ondblclick="edit_row('16',this.id)">22</td>
+          <td id="dept_row16"style="cursor:pointer;" ondblclick="edit_row('16',this.id)">CSE</td>
+          <td id="clg_row16"style="cursor:pointer;" ondblclick="edit_row('16',this.id)">KPR</td>
+          <td id="country_row16"style="cursor:pointer;" ondblclick="edit_row('16',this.id)">Chennai</td>
+          <td><button type="button" style="cursor: pointer;" id="edit_button16" value="Edit" class="edit"
+              onclick="edit_row('16')"><i class="fa fa-edit"></i></button>
+            <button type="button" style="display:none;cursor: pointer;" id="save_button16" value="Save" class="save"
+              onclick="save_row('16')"><i class="fa fa-save"></i></button>
+            <button type="button" style="cursor: pointer;" value="Delete" id="delete_button16" class="delete"
+              onclick="delete_row('16')"><i class="fa fa-trash"></i></button></td>
+        </tr>
+
+        <tr id="row17" onmouseover="show_icons('17')" onmouseout="hide_icons('17')">
+          <th>17</th>
+          <td id="name_row17"style="cursor:pointer;" ondblclick="edit_row('17',this.id)">karthi</td>
+          <td id="roll_row17"style="cursor:pointer;" ondblclick="edit_row('17',this.id)">40006</td>
+          <td id="age_row17"style="cursor:pointer;" ondblclick="edit_row('17',this.id)">22</td>
+          <td id="dept_row17"style="cursor:pointer;" ondblclick="edit_row('17',this.id)">CSE</td>
+          <td id="clg_row17"style="cursor:pointer;" ondblclick="edit_row('17',this.id)">KPR</td>
+          <td id="country_row17"style="cursor:pointer;" ondblclick="edit_row('17',this.id)">CBE</td>
+          <td><button type="button" style="cursor: pointer;" id="edit_button17" value="Edit" class="edit"
+              onclick="edit_row('17')"><i class="fa fa-edit"></i></button>
+            <button type="button" style="display:none;cursor: pointer;" id="save_button17" value="Save" class="save"
+              onclick="save_row('17')"><i class="fa fa-save"></i></button>
+            <button type="button" style="cursor: pointer;" value="Delete" id="delete_button17" class="delete"
+              onclick="delete_row('17')"><i class="fa fa-trash"></i></button></td>
+        </tr>
+
+        <tr id="row18" onmouseover="show_icons('18')" onmouseout="hide_icons('18')">
+          <th>18</th>
+          <td id="name_row18"style="cursor:pointer;" ondblclick="edit_row('18',this.id)">Ram</td>
+          <td id="roll_row18"style="cursor:pointer;" ondblclick="edit_row('18',this.id)">40022</td>
+          <td id="age_row18"style="cursor:pointer;" ondblclick="edit_row('18',this.id)">21</td>
+          <td id="dept_row18"style="cursor:pointer;" ondblclick="edit_row('18',this.id)">ECE</td>
+          <td id="clg_row18"style="cursor:pointer;" ondblclick="edit_row('18',this.id)">KCT</td>
+          <td id="country_row18"style="cursor:pointer;" ondblclick="edit_row('18',this.id)">Erode</td>
+          <td><button type="button" style="cursor: pointer;" id="edit_button18" value="Edit" class="edit"
+              onclick="edit_row('18')"><i class="fa fa-edit"></i></button>
+            <button type="button" style="display:none;cursor: pointer;" id="save_button18" value="Save" class="save"
+              onclick="save_row('18')"><i class="fa fa-save"></i></button>
+            <button type="button" style="cursor: pointer;" value="Delete" id="delete_button18" class="delete"
+              onclick="delete_row('18')"><i class="fa fa-trash"></i></button></td>
+        </tr>
+
+        <tr id="row19" onmouseover="show_icons('19')" onmouseout="hide_icons('19')">
+          <th>19</th>
+          <td id="name_row19"style="cursor:pointer;" ondblclick="edit_row('19',this.id)">Siva</td>
+          <td id="roll_row19"style="cursor:pointer;" ondblclick="edit_row('19',this.id)">40063</td>
+          <td id="age_row19"style="cursor:pointer;" ondblclick="edit_row('19',this.id)">20</td>
+          <td id="dept_row19"style="cursor:pointer;" ondblclick="edit_row('19',this.id)">EEE</td>
+          <td id="clg_row19"style="cursor:pointer;" ondblclick="edit_row('19',this.id)">MCT</td>
+          <td id="country_row19"style="cursor:pointer;" ondblclick="edit_row('19',this.id)">CBE</td>
+          <td><button type="button" style="cursor: pointer;" id="edit_button19" value="Edit" class="edit"
+              onclick="edit_row('19')"><i class="fa fa-edit"></i></button>
+            <button type="button" style="display:none;cursor: pointer;" id="save_button19" value="Save" class="save"
+              onclick="save_row('19')"><i class="fa fa-save"></i></button>
+            <button type="button" style="cursor: pointer;" value="Delete" id="delete_button19" class="delete"
+              onclick="delete_row('19')"><i class="fa fa-trash"></i></button></td>
+        </tr>
+
+        <tr id="row20" onmouseover="show_icons('20')" onmouseout="hide_icons('20')">
+          <th>20</th>
+          <td id="name_row20"style="cursor:pointer;" ondblclick="edit_row('20',this.id)">Gokul</td>
+          <td id="roll_row20"style="cursor:pointer;" ondblclick="edit_row('20',this.id)">40037</td>
+          <td id="age_row20"style="cursor:pointer;" ondblclick="edit_row('20',this.id)">20</td>
+          <td id="dept_row20"style="cursor:pointer;" ondblclick="edit_row('20',this.id)">CSE</td>
+          <td id="clg_row20"style="cursor:pointer;" ondblclick="edit_row('20',this.id)">UCLA</td>
+          <td id="country_row20"style="cursor:pointer;" ondblclick="edit_row('20',this.id)">Chennai</td>
+          <td><button type="button" style="cursor: pointer;" id="edit_button20" value="Edit" class="edit"
+              onclick="edit_row('20')"><i class="fa fa-edit"></i></button>
+            <button type="button" style="display:none;cursor: pointer;" id="save_button20" value="Save" class="save"
+              onclick="save_row('20')"><i class="fa fa-save"></i></button>
+            <button type="button" style="cursor: pointer;" value="Delete" id="delete_button20" class="delete"
+              onclick="delete_row('20')"><i class="fa fa-trash"></i></button></td>
+        </tr>
+        <tr id=new_row>
+          <th><input type="text" style="width:100px;" id="new_sno" style="display: none;"></th>
+          <td><input type="text" style="width:100px;" id="new_name"></td>
+          <td><input type="text" style="width:100px;" id="new_roll"></td>
+          <td><input type="text" style="width:100px;" id="new_age"></td>
+          <td><input type="text" style="width:100px;" id="new_dept"></td>
+          <td><input type="text" style="width:100px;" id="new_clg"></td>
+          <td><input type="text" style="width:100px;" id="new_country"></td>
+
+          <td><button type="button" style="cursor: pointer;"class="add" onclick="add_row();" value="Add Row"> <i
+                class="fa fa-plus"></i></button></td>
+        </tr>
+      </tbody>
+
+    </table>
+  </div>
+	<div class='pagination-container'>
+    <nav>
+      <ul class="pagination">
+      </ul>
+    </nav>
+  </div>
+</body>
+
+</html>
